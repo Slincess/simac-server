@@ -78,6 +78,7 @@ namespace server
                         massageData.massage_sender = data.CL_Name;
                         SV_Massage_All.Add(massageData);
                         */
+                        //if (data.Massage == "__DISCONNECT__" && data.CL_Name == "ADMIN")
                         Broadcast(massage_Recieved, massage_byteCount);
                         Console.WriteLine($"{data.CL_Name}: {data.Massage}");
 
@@ -87,7 +88,9 @@ namespace server
             }
             catch
             {
-
+                clients.Remove(user);
+                user.CL_Tcp.GetStream().Close();
+                user.CL_Tcp.Close();
             }
         }
 
