@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\kisac\\source\\repos\\basiccommunactionServerSide\\serverapp\\serverapp.csproj",
+      "projectUniqueName": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\serverapp.csproj",
       "projectName": "serverapp",
-      "projectPath": "C:\\Users\\kisac\\source\\repos\\basiccommunactionServerSide\\serverapp\\serverapp.csproj",
+      "projectPath": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\serverapp.csproj",
       "packagesPath": "C:\\Users\\kisac\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\kisac\\source\\repos\\basiccommunactionServerSide\\serverapp\\obj\\",
+      "outputPath": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
