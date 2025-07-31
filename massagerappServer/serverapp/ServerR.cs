@@ -24,20 +24,27 @@ namespace server
                 Isrunning = true;
                 server = new TcpListener(IPAddress.Any, 5000);
                 server.Start();
+                clients.RemoveRange(0,clients.Capacity);
                 await AcceptClients();
             }
         }
 
         private async Task AcceptClients()
         {
+
             while (Isrunning)
             {
                 TcpClient client = await server.AcceptTcpClientAsync();
                 Console.WriteLine("someoneConnected");
                 UserPack newUser = new();
                 newUser.CL_Tcp = client;
+                newUser.CL_ID = clients.Capacity;
                 _ = Task.Run(() => HandleClients(newUser));
                 clients.Add(newUser);
+                foreach (var item in clients)
+                {
+                    Console.WriteLine(item.CL_Tcp + " " + item.CL_ID);
+                }
             }
         }
 
@@ -78,7 +85,12 @@ namespace server
                         massageData.massage_sender = data.CL_Name;
                         SV_Massage_All.Add(massageData);
                         */
-                        //if (data.Massage == "__DISCONNECT__" && data.CL_Name == "ADMIN")
+                        if (data.Massage == "__DISCONNECT__" && data.CL_Name == "ADMIN")
+                        {
+                            clients.Remove(user);
+                            user.CL_Tcp.GetStream().Close();
+                            user.CL_Tcp.Close();
+                        }
                         Broadcast(massage_Recieved, massage_byteCount);
                         Console.WriteLine($"{data.CL_Name}: {data.Massage}");
 
@@ -96,6 +108,8 @@ namespace server
 
         private void Broadcast(byte[] massage, int lenght)
         {
+            List<UserPack> discClient = new();
+
             foreach (var item in clients)
             {
                 try
@@ -105,9 +119,15 @@ namespace server
                 }
                 catch
                 {
-                    clients.Remove(item);
-                    item.CL_Tcp.Close();
+                    discClient.Add(item);
                 }
+            }
+
+            foreach (var item in discClient)
+            {
+                clients.Remove(item);
+                item.CL_Tcp.GetStream().Close();
+                item.CL_Tcp.Close();
             }
         }
     }
