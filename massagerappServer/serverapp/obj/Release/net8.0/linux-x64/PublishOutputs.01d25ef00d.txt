@@ -1,0 +1,2 @@
+C:\Users\kisac\Documents\.test\testone\serverapp.pdb
+C:\Users\kisac\Documents\.test\testone\serverapp

@@ -15,7 +15,7 @@ namespace server
         private bool Isrunning = false;
         //private List<TcpClient> clients = new();
         private List<UserPack> clients = new();
-        private List<MassageData> SV_Massage_All = new();
+        private List<massage> SV_Massage_All = new();
 
         public async Task Run()
         {
@@ -24,7 +24,8 @@ namespace server
                 Isrunning = true;
                 server = new TcpListener(IPAddress.Any, 5000);
                 server.Start();
-                clients.RemoveRange(0,clients.Capacity);
+                clients.Clear();
+                Console.WriteLine("server started..");
                 await AcceptClients();
             }
         }
@@ -41,10 +42,11 @@ namespace server
                 newUser.CL_ID = clients.Capacity;
                 _ = Task.Run(() => HandleClients(newUser));
                 clients.Add(newUser);
-                foreach (var item in clients)
-                {
-                    Console.WriteLine(item.CL_Tcp + " " + item.CL_ID);
-                }
+                /*
+                massage Joinmassage = new();
+                Joinmassage.Massage = $"{newUser} joined the chat";
+                SV_Massage_All.Add(Joinmassage);
+                */
             }
         }
 
@@ -73,26 +75,42 @@ namespace server
                         CL_name = Encoding.UTF8.GetString(massage_Recieved, 0, massage_byteCount);
                         MassageCount++;
                         Console.WriteLine($"{CL_name} joined the chat");
+                        user.CL_Name = CL_name;
                         NetworkStream Stream = user.CL_Tcp.GetStream();
+                        massage massage = new();
+                        massage.Massage = $"{user.CL_Name} joined the chat";
+                        massage.sender = "SERVER";
+
+                        SV_Massage_All.Add(massage);
+                        Broadcast_AllMassages(user.CL_Tcp.GetStream());
                     }
                     else
                     {
                         string massage_Recieved_Json = Encoding.UTF8.GetString(massage_Recieved, 0, massage_byteCount);
                         DataPacks data = JsonSerializer.Deserialize<DataPacks>(massage_Recieved_Json);
-                        /*
-                        MassageData massageData = new();
-                        massageData.massage = data.Massage;
-                        massageData.massage_sender = data.CL_Name;
-                        SV_Massage_All.Add(massageData);
-                        */
+                        
                         if (data.Massage == "__DISCONNECT__" && data.CL_Name == "ADMIN")
                         {
+                            massage massage = new();
+                            massage.Massage = $"{user.CL_Name} left the chat";
+                            massage.sender = "SERVER";
+
+                            SV_Massage_All.Add(massage);
                             clients.Remove(user);
                             user.CL_Tcp.GetStream().Close();
                             user.CL_Tcp.Close();
                         }
+                        else
+                        {
+                            massage massage = new();
+                            massage.Massage = data.Massage;
+                            massage.sender = data.CL_Name;
+                            SV_Massage_All.Add(massage);
+                        }
+
                         Broadcast(massage_Recieved, massage_byteCount);
                         Console.WriteLine($"{data.CL_Name}: {data.Massage}");
+                        
 
                         //await stream.WriteAsync(massage_Recieved, 0, massage_byteCount);
                     }
@@ -104,6 +122,16 @@ namespace server
                 user.CL_Tcp.GetStream().Close();
                 user.CL_Tcp.Close();
             }
+        }
+
+        private void Broadcast_AllMassages(Stream stream)
+        {
+            SV_Massages sV_Massages = new();
+            sV_Massages.SV_allMassages = SV_Massage_All;
+            string AllMassages_Json = JsonSerializer.Serialize(sV_Massages);
+            byte[] Allmassages_byte = Encoding.UTF8.GetBytes(AllMassages_Json);
+            Console.WriteLine(AllMassages_Json);
+            stream.Write(Allmassages_byte);
         }
 
         private void Broadcast(byte[] massage, int lenght)
@@ -152,3 +180,14 @@ public class DataPacks
     public string? Massage { get; set; }
 }
 
+public class SV_Massages
+{
+    public List<massage> SV_allMassages { get; set; }
+}
+
+public class massage
+{
+    public string? Massage { get; set; }
+    public string? sender { get; set; }
+    public string? Hour { get; set; }
+}
