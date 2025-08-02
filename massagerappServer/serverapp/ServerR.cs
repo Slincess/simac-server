@@ -15,7 +15,7 @@ namespace server
         private bool Isrunning = false;
         //private List<TcpClient> clients = new();
         private List<UserPack> clients = new();
-        private List<massage> SV_Massage_All = new();
+        private List<message> SV_Message_All = new();
         private Users CCU = new();
 
         public async Task Run()
@@ -44,26 +44,26 @@ namespace server
                 _ = Task.Run(() => HandleClients(newUser));
                 clients.Add(newUser);
                 /*
-                massage Joinmassage = new();
-                Joinmassage.Massage = $"{newUser} joined the chat";
-                SV_Massage_All.Add(Joinmassage);
+                message Joinmessage = new();
+                Joinmessage.Message = $"{newUser} joined the chat";
+                SV_Message_All.Add(Joinmessage);
                 */
             }
         }
 
         private async Task HandleClients(UserPack user)
         {
-            int MassageCount = 0;
+            int MessageCount = 0;
             string CL_name = string.Empty;
             try
             {
                 using NetworkStream stream = user.CL_Tcp.GetStream();
-                byte[] massage_Recieved = new byte[5000];
+                byte[] message_Recieved = new byte[5000];
 
                 while (true)
                 {
-                    int massage_byteCount = await stream.ReadAsync(massage_Recieved, 0, massage_Recieved.Length);
-                    if (massage_byteCount == 0)
+                    int message_byteCount = await stream.ReadAsync(message_Recieved, 0, message_Recieved.Length);
+                    if (message_byteCount == 0)
                     {
                         Console.WriteLine($"{CL_name} left the chat");
                         clients.Remove(user);
@@ -71,19 +71,19 @@ namespace server
                         break;
                     }
 
-                    if (MassageCount == 0)
+                    if (MessageCount == 0)
                     {
-                        CL_name = Encoding.UTF8.GetString(massage_Recieved, 0, massage_byteCount);
-                        MassageCount++;
+                        CL_name = Encoding.UTF8.GetString(message_Recieved, 0, message_byteCount);
+                        MessageCount++;
                         Console.WriteLine($"{CL_name} joined the chat");
                         user.CL_Name = CL_name;
                         NetworkStream Stream = user.CL_Tcp.GetStream();
-                        massage massage = new();
-                        massage.Massage = $"{user.CL_Name} joined the chat";
-                        massage.sender = "SERVER";
+                        message message = new();
+                        message.Message = $"{user.CL_Name} joined the chat";
+                        message.sender = "SERVER";
 
-                        SV_Massage_All.Add(massage);
-                        Broadcast_AllMassages(user.CL_Tcp.GetStream());
+                        SV_Message_All.Add(message);
+                        Broadcast_AllMessages(user.CL_Tcp.GetStream());
 
                         CL_UserPack newCL_User = new();
                         newCL_User.CL_Name = user.CL_Name;
@@ -94,34 +94,35 @@ namespace server
                     }
                     else
                     {
-                        string massage_Recieved_Json = Encoding.UTF8.GetString(massage_Recieved, 0, massage_byteCount);
-                        DataPacks data = JsonSerializer.Deserialize<DataPacks>(massage_Recieved_Json);
+                        string message_Recieved_Json = Encoding.UTF8.GetString(message_Recieved, 0, message_byteCount);
+                        DataPacks data = JsonSerializer.Deserialize<DataPacks>(message_Recieved_Json);
                         
-                        if (data.Massage == "__DISCONNECT__" && data.CL_Name == "ADMIN")
+                        if (data.Message == "__DISCONNECT__" && data.CL_Name == "ADMIN")
                         {
-                            massage massage = new();
-                            massage.Massage = $"{user.CL_Name} left the chat";
-                            massage.sender = "SERVER";
+                            message message = new();
+                            message.Message = $"{user.CL_Name} left the chat";
+                            message.sender = "SERVER";
 
-                            SV_Massage_All.Add(massage);
+                            SV_Message_All.Add(message);
                             clients.Remove(user);
                             user.CL_Tcp.GetStream().Close();
                             user.CL_Tcp.Close();
                             CCU.SV_CCU.Remove(user.CL_UserPack);
+                            Broadcast_CCU();
                         }
                         else
                         {
-                            massage massage = new();
-                            massage.Massage = data.Massage;
-                            massage.sender = data.CL_Name;
-                            SV_Massage_All.Add(massage);
+                            message message = new();
+                            message.Message = data.Message;
+                            message.sender = data.CL_Name;
+                            SV_Message_All.Add(message);
                         }
-                        Console.WriteLine(massage_Recieved_Json);
-                        Broadcast(massage_Recieved, massage_byteCount);
-                        Console.WriteLine($"{data.CL_Name}: {data.Massage}");
+                        Console.WriteLine(message_Recieved_Json);
+                        Broadcast(message_Recieved, message_byteCount);
+                        Console.WriteLine($"{data.CL_Name}: {data.Message}");
                         
 
-                        //await stream.WriteAsync(massage_Recieved, 0, massage_byteCount);
+                        //await stream.WriteAsync(message_Recieved, 0, message_byteCount);
                     }
                 }
             }
@@ -140,7 +141,7 @@ namespace server
                 string CCU_Json = JsonSerializer.Serialize(CCU);
                 byte[] CCU_byte = new byte[1025];
                 CCU_byte = Encoding.UTF8.GetBytes(CCU_Json);
-                Console.WriteLine("send ccu json");
+                //Console.WriteLine("send ccu json");
                 Thread.Sleep(10);
                 foreach (var item in clients)
                 {
@@ -153,28 +154,28 @@ namespace server
                 throw;
             }
         }
-        private void Broadcast_AllMassages(Stream stream)
+        private void Broadcast_AllMessages(Stream stream)
         {
-            SV_Massages sV_Massages = new();
-            sV_Massages.SV_allMassages = SV_Massage_All;
-            string AllMassages_Json = JsonSerializer.Serialize(sV_Massages);
-            byte[] Allmassages_byte = Encoding.UTF8.GetBytes(AllMassages_Json);
-            Console.WriteLine("send all messages json");
-            stream.WriteAsync(Allmassages_byte,0,Allmassages_byte.Length);
+            SV_Messages sV_Messages = new();
+            sV_Messages.SV_allMessages = SV_Message_All;
+            string AllMessages_Json = JsonSerializer.Serialize(sV_Messages);
+            byte[] Allmessages_byte = Encoding.UTF8.GetBytes(AllMessages_Json);
+            //Console.WriteLine("send all messages json");
+            stream.WriteAsync(Allmessages_byte,0,Allmessages_byte.Length);
         }
 
-        private void Broadcast(byte[] massage, int lenght)
+        private void Broadcast(byte[] message, int lenght)
         {
             List<UserPack> discClient = new();
 
-            Console.WriteLine("send a reguler message");
+            //Console.WriteLine("send a reguler message");
 
             foreach (var item in clients)
             {
                 try
                 {
                     NetworkStream Stream = item.CL_Tcp.GetStream();
-                    Stream.WriteAsync(massage, 0, lenght);
+                    Stream.WriteAsync(message, 0, lenght);
                 }
                 catch
                 {
@@ -206,26 +207,26 @@ public class CL_UserPack
     public string? CL_Name { get; set; }
 }
 
-public class MassageData
+public class MessageData
 {
-    public string massage;
-    public string massage_sender;
+    public string message;
+    public string message_sender;
 }
 
 public class DataPacks
 {
     public string? CL_Name { get; set; }
-    public string? Massage { get; set; }
+    public string? Message { get; set; }
 }
 
-public class SV_Massages
+public class SV_Messages
 {
-    public List<massage> SV_allMassages { get; set; }
+    public List<message> SV_allMessages { get; set; }
 }
 
-public class massage
+public class message
 {
-    public string? Massage { get; set; }
+    public string? Message { get; set; }
     public string? sender { get; set; }
     public string? Hour { get; set; }
 }
