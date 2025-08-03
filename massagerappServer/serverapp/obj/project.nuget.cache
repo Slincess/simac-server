@@ -1,13 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "3RWBsX94uHk=",
+  "dgSpecHash": "rCIUCXBlz3E=",
   "success": true,
   "projectFilePath": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\serverapp.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\kisac\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.14\\microsoft.net.illink.tasks.8.0.14.nupkg.sha512",
-    "C:\\Users\\kisac\\.nuget\\packages\\microsoft.netcore.app.runtime.linux-x64\\8.0.14\\microsoft.netcore.app.runtime.linux-x64.8.0.14.nupkg.sha512",
-    "C:\\Users\\kisac\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-x64\\8.0.14\\microsoft.aspnetcore.app.runtime.linux-x64.8.0.14.nupkg.sha512",
-    "C:\\Users\\kisac\\.nuget\\packages\\microsoft.netcore.app.host.linux-x64\\8.0.14\\microsoft.netcore.app.host.linux-x64.8.0.14.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }
