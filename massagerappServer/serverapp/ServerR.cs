@@ -1,7 +1,9 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace server
@@ -10,9 +12,7 @@ namespace server
     {
         private TcpListener server;
         private bool Isrunning = false;
-        //private List<TcpClient> clients = new();
-        private List<UserPack> clients = new();
-        private List<message> SV_Message_All = new();
+        private List<DataPacks> SV_Message_All = new();
         private Users CCU = new();
 
         public async Task Run()
@@ -22,7 +22,7 @@ namespace server
                 Isrunning = true;
                 server = new TcpListener(IPAddress.Any, 5000);
                 server.Start();
-                clients.Clear();
+                CCU.SV_CCU.Clear();
                 Console.WriteLine("server started..");
                 await AcceptClients();
             }
@@ -37,24 +37,24 @@ namespace server
                 Console.WriteLine("someoneConnected");
                 UserPack newUser = new();
                 newUser.CL_Tcp = client;
-                newUser.CL_ID = clients.Count;
+                newUser.CL_ID = CCU.SV_CCU.Count;
                 _ = Task.Run(() => HandleClients(newUser));
-                clients.Add(newUser);
+                
                 /*
-                message Joinmessage = new();
-                Joinmessage.message = $"{newUser} joined the chat";
+                datapack Joinmessage = new();
+                Joinmessage.datapack = $"{newUser} joined the chat";
                 SV_Message_All.Add(Joinmessage);
                 */
             }
         }
 
-        private async Task HandleClients(UserPack user)
+        private async Task HandleClients(UserPack User)
         {
             int MessageCount = 0;
-            string CL_name = string.Empty;
+            string Sender = string.Empty;
             try
             {
-                using NetworkStream stream = user.CL_Tcp.GetStream();
+                using NetworkStream stream = User.CL_Tcp.GetStream();
                 byte[] message_Recieved = new byte[5000];
 
                 while (true)
@@ -67,33 +67,17 @@ namespace server
                     catch (Exception)
                     {
                         
-                            Console.WriteLine($"{CL_name} left the chat");
-                            clients.Remove(user);
-                            user.CL_Tcp.Close();
+                            Console.WriteLine($"{Sender} left the chat");
+                            CCU.SV_CCU.Remove(User);
+                            User.CL_Tcp.Close();
                             break;
                         
                     }
 
                     if (MessageCount == 0)
                     {
-                        CL_name = Encoding.UTF8.GetString(message_Recieved, 0, message_byteCount);
-                        MessageCount++;
-                        Console.WriteLine($"{CL_name} joined the chat");
-                        user.CL_Name = CL_name;
-                        NetworkStream Stream = user.CL_Tcp.GetStream();
-                        message message = new();
-                        message.Message = $"{user.CL_Name} joined the chat";
-                        message.sender = "SERVER";
-
-                        SV_Message_All.Add(message);
-                        Broadcast_AllMessages(user.CL_Tcp.GetStream());
-
-                        CL_UserPack newCL_User = new();
-                        newCL_User.CL_Name = user.CL_Name;
-                        newCL_User.CL_ID = user.CL_ID;
-                        user.CL_UserPack = newCL_User;
-                        CCU.SV_CCU.Add(newCL_User);
-                        Broadcast_CCU();
+                        
+                        HandleClientFirstNeeding(ref Sender, ref message_Recieved, ref message_byteCount, User,ref MessageCount);
                     }
                     else
                     {
@@ -105,45 +89,46 @@ namespace server
                         }
                         catch (Exception)
                         {
-                            Console.WriteLine(user.CL_Name + "send a invalid Json (should be normal massage) ");
+                            Console.WriteLine(User.CL_Name + "send a invalid Json (should be normal massage) ");
                             return;
                         }
                         
-                        if (data.Message == "__DISCONNECT__" && data.CL_Name == "ADMIN")
+                        if (data.Message == "__DISCONNECT__" && data.Sender == "ADMIN")
                         {
-                            DisconnectClient(user, "left the chat");
+                            DisconnectClient(User, "left the chat");
+                            return;
                         }
                         else
                         {
-                            message message = new();
-                            message.Message = data.Message;
-                            message.sender = data.CL_Name;
-                            SV_Message_All.Add(message);
+                            DataPacks datapack = new();
+                            datapack.Message = data.Message;
+                            datapack.Sender = data.Sender;
+                            SV_Message_All.Add(datapack);
 
                             DateTime now = DateTime.UtcNow;
 
-                            while(user.MessageTimestamps.Count > 0 && (now - user.MessageTimestamps.Peek()).TotalSeconds > 4)
+                            while(User.MessageTimestamps.Count > 0 && (now - User.MessageTimestamps.Peek()).TotalSeconds > 4)
                             {
-                                user.MessageTimestamps.Dequeue();
+                                User.MessageTimestamps.Dequeue();
                             }
-                            user.MessageTimestamps.Enqueue(now);
+                            User.MessageTimestamps.Enqueue(now);
 
-                            if (user.MessageTimestamps.Count >= 7)
+                            if (User.MessageTimestamps.Count >= 7)
                             {
-                                message Kickmessage = new();
+                                DataPacks Kickmessage = new();
                                 Kickmessage.Message = "__KICK__";
-                                Kickmessage.sender = "__SERVER__";
+                                Kickmessage.Sender = "__SERVER__";
                                 string KickMessage_Json = JsonSerializer.Serialize(Kickmessage);
                                 byte[] KickMessage_Byte = Encoding.UTF8.GetBytes(KickMessage_Json);
 
-                                await user.CL_Tcp.GetStream().WriteAsync(KickMessage_Byte, 0, KickMessage_Byte.Length);
-                                DisconnectClient(user, "was spamming and kicked out of the chat");
+                                await User.CL_Tcp.GetStream().WriteAsync(KickMessage_Byte, 0, KickMessage_Byte.Length);
+                                DisconnectClient(User, "was spamming and kicked out of the chat");
                                 return;
                             }
                         }
                         Console.WriteLine(message_Recieved_Json);
                         Broadcast(message_Recieved, message_byteCount);
-                        Console.WriteLine($"{data.CL_Name}: {data.Message}");
+                        Console.WriteLine($"{data.Sender}: {data.Message}");
                         
 
                         //await stream.WriteAsync(message_Recieved, 0, message_byteCount);
@@ -154,24 +139,24 @@ namespace server
             }
             catch (Exception e)
             {
-                Console.WriteLine(user.CL_Name + ": " + e);
-                clients.Remove(user);
-                user.CL_Tcp.GetStream().Close();
-                user.CL_Tcp.Close();
+                Console.WriteLine(User.CL_Name + ": " + e);
+                CCU.SV_CCU.Remove(User);
+                User.CL_Tcp.GetStream().Close();
+                User.CL_Tcp.Close();
             }
         }
 
         private void DisconnectClient(UserPack user,string reason)
         {
-            message message = new();
-            message.Message = $"{user.CL_Name} {reason}";
-            message.sender = "SERVER";
+            DataPacks datapack = new();
+            datapack.Message = $"{user.CL_Name} {reason}";
+            datapack.Sender = "SERVER";
 
-            SV_Message_All.Add(message);
-            clients.Remove(user);
+            SV_Message_All.Add(datapack);
+            CCU.SV_CCU.Remove(user);
             user.CL_Tcp.GetStream().Close();
             user.CL_Tcp.Close();
-            CCU.SV_CCU.Remove(user.CL_UserPack);
+            CCU.SV_CCU.Remove(user);
             Broadcast_CCU();
         }
 
@@ -182,17 +167,33 @@ namespace server
                 string CCU_Json = JsonSerializer.Serialize(CCU);
                 byte[] CCU_byte = new byte[1025];
                 CCU_byte = Encoding.UTF8.GetBytes(CCU_Json);
+
+                List<UserPack> Problematic = new();
                
-                await Task.Delay(10);
-                foreach (var item in clients)
+                await Task.Delay(15);
+                foreach (var item in CCU.SV_CCU)
                 {
-                    item.CL_Tcp.GetStream().WriteAsync(CCU_byte, 0, CCU_byte.Length);
+                    try
+                    {
+                        item.CL_Tcp.GetStream().WriteAsync(CCU_byte, 0, CCU_byte.Length);
+                    }
+                    catch (Exception)
+                    {
+                        Problematic.Add(item);
+                    }
+                }
+
+                if(Problematic.Count > 0)
+                {
+                    foreach (var item in Problematic)
+                    {
+                        CCU.SV_CCU.Remove(item);
+                    }
                 }
             }
             catch(Exception e)
             {
                 Console.WriteLine(e);
-                throw;
             }
         }
         private void Broadcast_AllMessages(Stream stream)
@@ -209,7 +210,7 @@ namespace server
         {
             List<UserPack> discClient = new();
 
-            foreach (var item in clients)
+            foreach (var item in CCU.SV_CCU)
             {
                 try
                 {
@@ -224,54 +225,59 @@ namespace server
 
             foreach (var item in discClient)
             {
-                clients.Remove(item);
+                CCU.SV_CCU.Remove(item);
                 item.CL_Tcp.GetStream().Close();
                 item.CL_Tcp.Close();
             }
+        }
+
+        private void HandleClientFirstNeeding(ref string Sender, ref byte[] message_Recieved,ref int message_byteCount,UserPack user,ref int MessageCount)
+        {
+            Sender = Encoding.UTF8.GetString(message_Recieved, 0, message_byteCount);
+            MessageCount++;
+            Console.WriteLine($"{Sender} joined the chat");
+            user.CL_Name = Sender;
+            NetworkStream Stream = user.CL_Tcp.GetStream();
+
+            DataPacks message = new();
+            message.Message = $"{user.CL_Name} joined the chat";
+            message.Sender = "SERVER";
+
+            SV_Message_All.Add(message);
+            Broadcast_AllMessages(user.CL_Tcp.GetStream());
+
+            UserPack newCL_User = new();
+            newCL_User.CL_Name = user.CL_Name;
+            newCL_User.CL_ID = user.CL_ID;
+            newCL_User.CL_Tcp = user.CL_Tcp;
+
+            CCU.SV_CCU.Add(newCL_User);
+            Broadcast_CCU();
         }
     }
 }
 
 public class UserPack
 {
-    public Queue<DateTime> MessageTimestamps = new();
-    public int CL_ID { get; set; }
-    public TcpClient CL_Tcp { get; set; }
+    [JsonIgnore] public Queue<DateTime> MessageTimestamps = new();
+    [JsonIgnore]  public TcpClient CL_Tcp { get; set; }
     public string? CL_Name { get; set; }
-    public CL_UserPack CL_UserPack { get; set; }
-}
-
-public class CL_UserPack
-{
     public int CL_ID { get; set; }
-    public string? CL_Name { get; set; }
-}
-
-public class MessageData
-{
-    public string message;
-    public string message_sender;
 }
 
 public class DataPacks
 {
-    public string? CL_Name { get; set; }
+    public string? Sender { get; set; }
     public string? Message { get; set; }
 }
 
 public class SV_Messages
 {
-    public List<message> SV_allMessages { get; set; }
+    public List<DataPacks> SV_allMessages { get; set; } = new();
 }
 
-public class message
-{
-    public string? Message { get; set; }
-    public string? sender { get; set; }
-    public string? Hour { get; set; }
-}
 
 public class Users
 {
-    public List<CL_UserPack> SV_CCU { get; set; } = new List<CL_UserPack>();
+    public List<UserPack> SV_CCU { get; set; } = new List<UserPack>();
 }
