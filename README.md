@@ -9,3 +9,6 @@ at the end type `./serverapp` to start the server.
 
 # important!  
 server will be on port 5000 on default.
+
+# License  
+[MIT license ©](https://github.com/Slincess/simac-server/blob/main/LICENSE)
