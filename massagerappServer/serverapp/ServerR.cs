@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
@@ -55,7 +56,7 @@ namespace server
             try
             {
                 using NetworkStream stream = User.CL_Tcp.GetStream();
-                byte[] message_Recieved = new byte[5000];
+                byte[] message_Recieved = new byte[15000000];
 
                 while (true)
                 {
@@ -90,6 +91,7 @@ namespace server
                         catch (Exception)
                         {
                             Console.WriteLine(User.CL_Name + "send a invalid Json (should be normal massage) ");
+                            //Console.WriteLine(message_Recieved_Json);
                             return;
                         }
                         
@@ -103,6 +105,8 @@ namespace server
                             DataPacks datapack = new();
                             datapack.Message = data.Message;
                             datapack.Sender = data.Sender;
+                            if (datapack.Picture != null)
+                                datapack.Picture = data.Picture;
                             SV_Message_All.Add(datapack);
 
                             DateTime now = DateTime.UtcNow;
@@ -264,11 +268,11 @@ public class UserPack
     public string? CL_Name { get; set; }
     public int CL_ID { get; set; }
 }
-
 public class DataPacks
 {
     public string? Sender { get; set; }
     public string? Message { get; set; }
+    public string? Picture { get; set; }
 }
 
 public class SV_Messages
