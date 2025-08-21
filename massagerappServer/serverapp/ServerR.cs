@@ -18,6 +18,7 @@ namespace server
 
         public async Task Run()
         {
+
             if (!Isrunning)
             {
                 Isrunning = true;
@@ -25,27 +26,48 @@ namespace server
                 server.Start();
                 CCU.SV_CCU.Clear();
                 Console.WriteLine("server started..");
-                await AcceptClients();
+                _ = AcceptClients();
             }
+        }
+
+        public async Task StopServer()
+        {
+            if (!Isrunning) return;
+            Isrunning = false;
+            foreach (var item in CCU.SV_CCU)
+            {
+                DisconnectClient(item, "server shuted down");
+            }
+            server.Stop();
         }
 
         private async Task AcceptClients()
         {
-
-            while (Isrunning)
+            try
             {
-                TcpClient client = await server.AcceptTcpClientAsync();
-                Console.WriteLine("someoneConnected");
-                UserPack newUser = new();
-                newUser.CL_Tcp = client;
-                newUser.CL_ID = CCU.SV_CCU.Count;
-                _ = Task.Run(() => HandleClients(newUser));
-                
-                /*
-                datapack Joinmessage = new();
-                Joinmessage.datapack = $"{newUser} joined the chat";
-                SV_Message_All.Add(Joinmessage);
-                */
+                while (Isrunning)
+                {
+                    TcpClient client = await server.AcceptTcpClientAsync();
+                    Console.WriteLine("someoneConnected");
+                    UserPack newUser = new();
+                    newUser.CL_Tcp = client;
+                    newUser.CL_ID = CCU.SV_CCU.Count;
+                    _ = Task.Run(() => HandleClients(newUser));
+
+                    /*
+                    datapack Joinmessage = new();
+                    Joinmessage.datapack = $"{newUser} joined the chat";
+                    SV_Message_All.Add(Joinmessage);
+                    */
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                Console.WriteLine("server Stopped");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"AcceptClient error: {e}");
             }
         }
 

@@ -13,3 +13,5 @@ C:\Users\kisac\source\repos\massagerappServer\massagerappServer\serverapp\obj\De
 C:\Users\kisac\source\repos\massagerappServer\massagerappServer\serverapp\obj\Debug\net8.0\serverapp.pdb
 C:\Users\kisac\source\repos\massagerappServer\massagerappServer\serverapp\obj\Debug\net8.0\serverapp.genruntimeconfig.cache
 C:\Users\kisac\source\repos\massagerappServer\massagerappServer\serverapp\obj\Debug\net8.0\ref\serverapp.dll
+C:\Users\kisac\source\repos\massagerappServer\massagerappServer\serverapp\bin\Debug\net8.0\wwwroot\index.html
+C:\Users\kisac\source\repos\massagerappServer\massagerappServer\serverapp\bin\Debug\net8.0\wwwroot\css\style.css

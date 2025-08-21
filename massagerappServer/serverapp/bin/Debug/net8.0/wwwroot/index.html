@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div>
+      <button class="Buttons" id="OpenButton" onclick="OpenServer()">
+        Open
+      </button>
+      <button class="Buttons" id="CloseButton" onclick="CloseServer()">
+        Close
+      </button>
+    </div>
+
+    <script>
+      async function CloseServer() {
+        let response = await fetch("/api/CloseServer");
+      }
+      async function OpenServer() {
+        let response = await fetch("/api/StartServer");
+      }
+    </script>
+  </body>
+</html>
