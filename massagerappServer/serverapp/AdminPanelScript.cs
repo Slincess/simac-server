@@ -16,13 +16,13 @@ namespace serverapp
 {
     public class AdminPanelScript
     {
+        serverR server = new();
+        Task? serverTask;
+        CancellationTokenSource? cs;
         public async Task Run()
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder();
             WebApplication app = builder.Build();
-            serverR server = new();
-            Task serverTask;
-            CancellationTokenSource cs = new();
 
             app.UseStaticFiles();
             app.MapGet("/", context =>
@@ -30,13 +30,17 @@ namespace serverapp
                 context.Response.Redirect("/index.html");
                 return Task.CompletedTask;
             });
-            app.MapGet("api/CloseServer", async () =>
-            {
-               await server.StopServer();
-            });
             app.MapGet("api/StartServer", () =>
             {
-                serverTask = Task.Run(() => server.Run());
+                cs = new();
+                serverTask = Task.Run(() => server.Run(cs.Token), cs.Token);
+
+            });
+            app.MapGet("api/CloseServer", async () =>
+            {
+                await server.StopServer();
+                cs?.Cancel();
+                
             });
 
             await Task.Run(() => app.Run("http://localhost:5001"));

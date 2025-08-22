@@ -11,17 +11,19 @@ namespace server
 {
     public class serverR
     {
-        private TcpListener server;
+        private TcpListener? server;
         private bool Isrunning = false;
         private List<DataPacks> SV_Message_All = new();
         private Users CCU = new();
+        private CancellationToken Ct;
 
-        public async Task Run()
+        public async Task Run(CancellationToken ct)
         {
 
             if (!Isrunning)
             {
                 Isrunning = true;
+                Ct = ct;
                 server = new TcpListener(IPAddress.Any, 5000);
                 server.Start();
                 CCU.SV_CCU.Clear();
@@ -33,12 +35,12 @@ namespace server
         public async Task StopServer()
         {
             if (!Isrunning) return;
-            Isrunning = false;
             foreach (var item in CCU.SV_CCU)
             {
-                DisconnectClient(item, "server shuted down");
+                DisconnectClient(item, "bad news server is down ✌️");
             }
-            server.Stop();
+            Isrunning = false;
+            server?.Stop();
         }
 
         private async Task AcceptClients()
@@ -47,6 +49,11 @@ namespace server
             {
                 while (Isrunning)
                 {
+                    if (Ct.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
                     TcpClient client = await server.AcceptTcpClientAsync();
                     Console.WriteLine("someoneConnected");
                     UserPack newUser = new();
@@ -60,10 +67,6 @@ namespace server
                     SV_Message_All.Add(Joinmessage);
                     */
                 }
-            }
-            catch (ObjectDisposedException)
-            {
-                Console.WriteLine("server Stopped");
             }
             catch (Exception e)
             {
@@ -80,8 +83,12 @@ namespace server
                 using NetworkStream stream = User.CL_Tcp.GetStream();
                 byte[] message_Recieved = new byte[15000000];
 
-                while (true)
+                while (Isrunning)
                 {
+                    if (Ct.IsCancellationRequested)
+                    {
+                        break;
+                    }
                     int message_byteCount = 1;
                     try
                     {
@@ -106,6 +113,7 @@ namespace server
                     {
                         string message_Recieved_Json = Encoding.UTF8.GetString(message_Recieved, 0, message_byteCount);
                         DataPacks data;
+
                         try
                         {
                             data = JsonSerializer.Deserialize<DataPacks>(message_Recieved_Json);
@@ -113,7 +121,6 @@ namespace server
                         catch (Exception)
                         {
                             Console.WriteLine(User.CL_Name + "send a invalid Json (should be normal massage) ");
-                            //Console.WriteLine(message_Recieved_Json);
                             return;
                         }
                         
@@ -131,37 +138,19 @@ namespace server
                                 datapack.Picture = data.Picture;
                             SV_Message_All.Add(datapack);
 
-                            DateTime now = DateTime.UtcNow;
+                            HandleSpams(User);
 
-                            while(User.MessageTimestamps.Count > 0 && (now - User.MessageTimestamps.Peek()).TotalSeconds > 4)
-                            {
-                                User.MessageTimestamps.Dequeue();
-                            }
-                            User.MessageTimestamps.Enqueue(now);
-
-                            if (User.MessageTimestamps.Count >= 7)
-                            {
-                                DataPacks Kickmessage = new();
-                                Kickmessage.Message = "__KICK__";
-                                Kickmessage.Sender = "__SERVER__";
-                                string KickMessage_Json = JsonSerializer.Serialize(Kickmessage);
-                                byte[] KickMessage_Byte = Encoding.UTF8.GetBytes(KickMessage_Json);
-
-                                await User.CL_Tcp.GetStream().WriteAsync(KickMessage_Byte, 0, KickMessage_Byte.Length);
-                                DisconnectClient(User, "was spamming and kicked out of the chat");
-                                return;
-                            }
                         }
                         Console.WriteLine(message_Recieved_Json);
                         Broadcast(message_Recieved, message_byteCount);
                         Console.WriteLine($"{data.Sender}: {data.Message}");
-                        
-
-                        //await stream.WriteAsync(message_Recieved, 0, message_byteCount);
                     }
-                    //await Task.Delay(1000); // add protaction with max massage count per second and
-                    //if someone detects to be spammer graylist his ip and if he does again send black list him.
                 }
+            }
+            catch (ObjectDisposedException)
+            {
+                Console.WriteLine("server Stopped");
+                throw;
             }
             catch (Exception e)
             {
@@ -177,13 +166,17 @@ namespace server
             DataPacks datapack = new();
             datapack.Message = $"{user.CL_Name} {reason}";
             datapack.Sender = "SERVER";
+            string LeaveJson = JsonSerializer.Serialize(datapack);
+            byte[] leaveByte = Encoding.UTF8.GetBytes(LeaveJson);
+            user.CL_Tcp.GetStream().Write(leaveByte);
 
             SV_Message_All.Add(datapack);
             CCU.SV_CCU.Remove(user);
             user.CL_Tcp.GetStream().Close();
             user.CL_Tcp.Close();
             CCU.SV_CCU.Remove(user);
-            Broadcast_CCU();
+            if(!reason.Contains("server"))
+                Broadcast_CCU();
         }
 
         private async Task Broadcast_CCU()
@@ -280,6 +273,31 @@ namespace server
             CCU.SV_CCU.Add(newCL_User);
             Broadcast_CCU();
         }
+
+        private async void HandleSpams(UserPack User) 
+        {
+            DateTime now = DateTime.UtcNow;
+
+            while (User.MessageTimestamps.Count > 0 && (now - User.MessageTimestamps.Peek()).TotalSeconds > 4)
+            {
+                User.MessageTimestamps.Dequeue();
+            }
+            User.MessageTimestamps.Enqueue(now);
+
+            if (User.MessageTimestamps.Count >= 7)
+            {
+                DataPacks Kickmessage = new();
+                Kickmessage.Message = "__KICK__";
+                Kickmessage.Sender = "__SERVER__";
+                string KickMessage_Json = JsonSerializer.Serialize(Kickmessage);
+                byte[] KickMessage_Byte = Encoding.UTF8.GetBytes(KickMessage_Json);
+
+                await User.CL_Tcp.GetStream().WriteAsync(KickMessage_Byte, 0, KickMessage_Byte.Length);
+                DisconnectClient(User, "was spamming and kicked out of the chat");
+                return;
+            }
+        }
+    
     }
 }
 
