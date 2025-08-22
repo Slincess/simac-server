@@ -35,12 +35,15 @@ namespace server
         public async Task StopServer()
         {
             if (!Isrunning) return;
-            foreach (var item in CCU.SV_CCU)
+            Isrunning = false;
+            server?.Stop();
+            server = null;
+            foreach (var item in CCU.SV_CCU.ToList())
             {
                 DisconnectClient(item, "bad news server is down ✌️");
             }
-            Isrunning = false;
-            server?.Stop();
+            CCU.SV_CCU.Clear();
+            SV_Message_All.Clear();
         }
 
         private async Task AcceptClients()
@@ -138,7 +141,26 @@ namespace server
                                 datapack.Picture = data.Picture;
                             SV_Message_All.Add(datapack);
 
-                            HandleSpams(User);
+                            DateTime now = DateTime.UtcNow;
+
+                            while (User.MessageTimestamps.Count > 0 && (now - User.MessageTimestamps.Peek()).TotalSeconds > 4)
+                            {
+                                User.MessageTimestamps.Dequeue();
+                            }
+                            User.MessageTimestamps.Enqueue(now);
+
+                            if (User.MessageTimestamps.Count >= 7)
+                            {
+                                DataPacks Kickmessage = new();
+                                Kickmessage.Message = "__KICK__";
+                                Kickmessage.Sender = "__SERVER__";
+                                string KickMessage_Json = JsonSerializer.Serialize(Kickmessage);
+                                byte[] KickMessage_Byte = Encoding.UTF8.GetBytes(KickMessage_Json);
+
+                                await User.CL_Tcp.GetStream().WriteAsync(KickMessage_Byte, 0, KickMessage_Byte.Length);
+                                DisconnectClient(User, "was spamming and kicked out of the chat");
+                                return;
+                            }
 
                         }
                         Console.WriteLine(message_Recieved_Json);
@@ -171,7 +193,6 @@ namespace server
             user.CL_Tcp.GetStream().Write(leaveByte);
 
             SV_Message_All.Add(datapack);
-            CCU.SV_CCU.Remove(user);
             user.CL_Tcp.GetStream().Close();
             user.CL_Tcp.Close();
             CCU.SV_CCU.Remove(user);
@@ -274,7 +295,7 @@ namespace server
             Broadcast_CCU();
         }
 
-        private async void HandleSpams(UserPack User) 
+        private async Task HandleSpams(UserPack User) 
         {
             DateTime now = DateTime.UtcNow;
 

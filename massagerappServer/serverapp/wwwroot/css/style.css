@@ -1,4 +1,113 @@
-.Buttons{
-    width: 23%;
-    height: 100px;
+body {
+  margin: 0;
+  background: #1e1e1e;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 150px;
+  background: #2c2c2c;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.sidebar h2 {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+}
+
+.sidebar button {
+  background: #444;
+  border: none;
+  padding: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sidebar button:hover {
+  background: #555;
+}
+
+/* Main area */
+.main {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.server-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2c;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px;
+}
+
+.server-info div {
+  display: flex;
+  flex-direction: column;
+  font-size: 18px;    
+  font-weight: bold;  
+  gap: 5px;           
+}
+
+.server-info button {
+  background: #444;
+  border: none;
+  padding: 10px 16px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+}
+
+.panel {
+  flex: 1;
+  background: #2c2c2c;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel.small {
+  flex: 0 0 200px;
+  max-width: 200px;
+}
+
+.panel.chat {
+  flex: 1;
+}
+
+.panel h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+
+.scrollview {
+  flex: 1;
+  overflow-y: auto;
+  background: #1a1a1a;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.Headers{
+    text-align: center;
 }

@@ -2,26 +2,84 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Dashboard</title>
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
-    <div>
-      <button class="Buttons" id="OpenButton" onclick="OpenServer()">
-        Open
-      </button>
-      <button class="Buttons" id="CloseButton" onclick="CloseServer()">
-        Close
-      </button>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2 class="Headers">name</h2>
+      <button>Dashboard</button>
+      <button>Usage</button>
     </div>
 
-    <script>
-      async function CloseServer() {
-        let response = await fetch("/api/CloseServer");
-      }
-      async function OpenServer() {
-        let response = await fetch("/api/StartServer");
-      }
-    </script>
+    <!-- Main area -->
+    <div class="main">
+      <div class="server-info">
+        <div>
+          <div>IP</div>
+          <div>port</div>
+        </div>
+        <button id="ServerStatButton" onclick="OpenOrCloseServer()">
+          stop server
+        </button>
+      </div>
+
+      <script>
+        async function OpenOrCloseServer() {
+          const button = document.getElementById("ServerStatButton");
+
+          let isRunning = await (await fetch("/api/running")).json();
+
+          if (isRunning) {
+              await fetch("/api/CloseServer");
+            button.textContent = "Run";
+          } else {
+            await fetch("/api/StartServer");
+            button.textContent = "Close";
+          }
+        }
+      </script>
+
+      <div class="content">
+        <!-- CCU Panel -->
+        <div class="panel small">
+          <h3>CCU</h3>
+          <div class="scrollview">
+            <ul>
+              <li>User 1</li>
+              <li>User 2</li>
+              <li>User 3</li>
+              <li>User 4</li>
+              <li>User 5</li>
+              <li>User 6</li>
+              <li>User 7</li>
+              <li>User 8</li>
+              <li>User 9</li>
+              <li>User 10</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Active Chat Panel -->
+        <div class="panel chat">
+          <h3>active chat</h3>
+          <div class="scrollview">
+            <p><b>User 1:</b> Hello</p>
+            <p><b>User 2:</b> Hi!</p>
+            <p><b>User 3:</b> How’s it going?</p>
+            <p><b>User 1:</b> Pretty good, thanks.</p>
+            <p><b>User 4:</b> Anyone online?</p>
+            <p><b>User 5:</b> Yep, here!</p>
+            <p><b>User 2:</b> Let’s test scrolling...</p>
+            <p><b>User 3:</b> More messages...</p>
+            <p><b>User 4:</b> Keep going...</p>
+            <p><b>User 5:</b> This should scroll.</p>
+            <p><b>User 1:</b> Scroll confirmed ✅</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

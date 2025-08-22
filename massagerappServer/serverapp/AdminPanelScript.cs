@@ -19,12 +19,14 @@ namespace serverapp
         serverR server = new();
         Task? serverTask;
         CancellationTokenSource? cs;
+        private bool isRunning;
         public async Task Run()
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder();
             WebApplication app = builder.Build();
 
             app.UseStaticFiles();
+
             app.MapGet("/", context =>
             {
                 context.Response.Redirect("/index.html");
@@ -34,13 +36,19 @@ namespace serverapp
             {
                 cs = new();
                 serverTask = Task.Run(() => server.Run(cs.Token), cs.Token);
-
+                isRunning = true;
+                //return Results.Ok(true);
             });
             app.MapGet("api/CloseServer", async () =>
             {
                 await server.StopServer();
                 cs?.Cancel();
-                
+                isRunning = false;
+                //return Results.Ok(true);
+            });
+            app.MapGet("api/running", () =>
+            {
+                return isRunning;
             });
 
             await Task.Run(() => app.Run("http://localhost:5001"));
