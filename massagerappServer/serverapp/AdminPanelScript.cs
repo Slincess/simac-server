@@ -17,6 +17,7 @@ namespace serverapp
     public class AdminPanelScript
     {
         serverR server = new();
+        S_analytics analytics = new();
         Task? serverTask;
         CancellationTokenSource? cs;
         private bool isRunning;
@@ -34,6 +35,7 @@ namespace serverapp
             });
             app.MapGet("api/StartServer", () =>
             {
+                server.analytics = analytics;
                 cs = new();
                 serverTask = Task.Run(() => server.Run(cs.Token), cs.Token);
                 isRunning = true;

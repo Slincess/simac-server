@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using serverapp;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -13,8 +14,9 @@ namespace server
     {
         private TcpListener? server;
         private bool Isrunning = false;
-        private List<DataPacks> SV_Message_All = new();
-        private Users CCU = new();
+        //private List<DataPacks> SV_Message_All = new();
+        public S_analytics analytics;
+        //private Users CCU = new();
         private CancellationToken Ct;
 
         public async Task Run(CancellationToken ct)
@@ -26,7 +28,7 @@ namespace server
                 Ct = ct;
                 server = new TcpListener(IPAddress.Any, 5000);
                 server.Start();
-                CCU.SV_CCU.Clear();
+                analytics.GetCCU().SV_CCU.Clear();
                 Console.WriteLine("server started..");
                 _ = AcceptClients();
             }
@@ -38,12 +40,12 @@ namespace server
             Isrunning = false;
             server?.Stop();
             server = null;
-            foreach (var item in CCU.SV_CCU.ToList())
+            foreach (var item in analytics.GetCCU().SV_CCU.ToList())
             {
                 DisconnectClient(item, "bad news server is down ✌️");
             }
-            CCU.SV_CCU.Clear();
-            SV_Message_All.Clear();
+            analytics.GetCCU().SV_CCU.Clear();
+            analytics.SaveMessages();
         }
 
         private async Task AcceptClients()
@@ -61,7 +63,7 @@ namespace server
                     Console.WriteLine("someoneConnected");
                     UserPack newUser = new();
                     newUser.CL_Tcp = client;
-                    newUser.CL_ID = CCU.SV_CCU.Count;
+                    newUser.CL_ID = analytics.GetCCU().SV_CCU.Count;
                     _ = Task.Run(() => HandleClients(newUser));
 
                     /*
@@ -101,7 +103,7 @@ namespace server
                     {
                         
                             Console.WriteLine($"{Sender} left the chat");
-                            CCU.SV_CCU.Remove(User);
+                        analytics.GetCCU().SV_CCU.Remove(User);
                             User.CL_Tcp.Close();
                             break;
                         
@@ -139,7 +141,7 @@ namespace server
                             datapack.Sender = data.Sender;
                             if (datapack.Picture != null)
                                 datapack.Picture = data.Picture;
-                            SV_Message_All.Add(datapack);
+                            analytics.AddMessage_List(datapack);
 
                             DateTime now = DateTime.UtcNow;
 
@@ -177,7 +179,7 @@ namespace server
             catch (Exception e)
             {
                 Console.WriteLine(User.CL_Name + ": " + e);
-                CCU.SV_CCU.Remove(User);
+                analytics.GetCCU().SV_CCU.Remove(User);
                 User.CL_Tcp.GetStream().Close();
                 User.CL_Tcp.Close();
             }
@@ -192,10 +194,10 @@ namespace server
             byte[] leaveByte = Encoding.UTF8.GetBytes(LeaveJson);
             user.CL_Tcp.GetStream().Write(leaveByte);
 
-            SV_Message_All.Add(datapack);
+            analytics.AddMessage_List(datapack);
             user.CL_Tcp.GetStream().Close();
             user.CL_Tcp.Close();
-            CCU.SV_CCU.Remove(user);
+            analytics.GetCCU().SV_CCU.Remove(user);
             if(!reason.Contains("server"))
                 Broadcast_CCU();
         }
@@ -204,14 +206,13 @@ namespace server
         {
             try
             {
-                string CCU_Json = JsonSerializer.Serialize(CCU);
                 byte[] CCU_byte = new byte[1025];
-                CCU_byte = Encoding.UTF8.GetBytes(CCU_Json);
+                CCU_byte = Encoding.UTF8.GetBytes(analytics.GetCCU_Json());
 
                 List<UserPack> Problematic = new();
                
                 await Task.Delay(15);
-                foreach (var item in CCU.SV_CCU)
+                foreach (var item in analytics.GetCCU().SV_CCU)
                 {
                     try
                     {
@@ -227,7 +228,7 @@ namespace server
                 {
                     foreach (var item in Problematic)
                     {
-                        CCU.SV_CCU.Remove(item);
+                        analytics.GetCCU().SV_CCU.Remove(item);
                     }
                 }
             }
@@ -238,9 +239,7 @@ namespace server
         }
         private void Broadcast_AllMessages(Stream stream)
         {
-            SV_Messages sV_Messages = new();
-            sV_Messages.SV_allMessages = SV_Message_All;
-            string AllMessages_Json = JsonSerializer.Serialize(sV_Messages);
+            string AllMessages_Json = analytics.GetMessages_Json();
             byte[] Allmessages_byte = Encoding.UTF8.GetBytes(AllMessages_Json);
             Console.WriteLine(AllMessages_Json);
             stream.WriteAsync(Allmessages_byte,0,Allmessages_byte.Length);
@@ -250,7 +249,7 @@ namespace server
         {
             List<UserPack> discClient = new();
 
-            foreach (var item in CCU.SV_CCU)
+            foreach (var item in analytics.GetCCU().SV_CCU)
             {
                 try
                 {
@@ -263,9 +262,9 @@ namespace server
                 }
             }
 
-            foreach (var item in discClient)
+            foreach (var item in discClient.ToList())
             {
-                CCU.SV_CCU.Remove(item);
+                analytics.GetCCU().SV_CCU.Remove(item);
                 item.CL_Tcp.GetStream().Close();
                 item.CL_Tcp.Close();
             }
@@ -283,15 +282,15 @@ namespace server
             message.Message = $"{user.CL_Name} joined the chat";
             message.Sender = "SERVER";
 
-            SV_Message_All.Add(message);
-            Broadcast_AllMessages(user.CL_Tcp.GetStream());
+            analytics.AddMessage_List(message);
 
             UserPack newCL_User = new();
             newCL_User.CL_Name = user.CL_Name;
             newCL_User.CL_ID = user.CL_ID;
             newCL_User.CL_Tcp = user.CL_Tcp;
 
-            CCU.SV_CCU.Add(newCL_User);
+            analytics.GetCCU().SV_CCU.Add(newCL_User);
+            Broadcast_AllMessages(user.CL_Tcp.GetStream());
             Broadcast_CCU();
         }
 
