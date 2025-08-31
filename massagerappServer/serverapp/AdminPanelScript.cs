@@ -35,7 +35,7 @@ namespace serverapp
             });
             app.MapGet("api/StartServer", () =>
             {
-                server.analytics = analytics;
+                //server.analytics = analytics;
                 cs = new();
                 serverTask = Task.Run(() => server.Run(cs.Token), cs.Token);
                 isRunning = true;
