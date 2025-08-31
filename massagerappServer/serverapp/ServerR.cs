@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using serverapp;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -13,8 +14,6 @@ namespace server
     {
         private TcpListener? server;
         private bool Isrunning = false;
-        private List<DataPacks> SV_Message_All = new();
-        private Users CCU = new();
         private CancellationToken Ct;
         UserPack newUser = new();
 
@@ -27,7 +26,6 @@ namespace server
                 Ct = ct;
                 server = new TcpListener(IPAddress.Any, 5000);
                 server.Start();
-                CCU.SV_CCU.Clear();
                 Console.WriteLine("server started..");
                 _ = AcceptClients();
             }
@@ -39,12 +37,10 @@ namespace server
             Isrunning = false;
             server?.Stop();
             server = null;
-            foreach (var item in CCU.SV_CCU.ToList())
+            foreach (var item in S_analytics.Instance.GetCCU().SV_CCU.ToList())
             {
                 DisconnectClient(item, "bad news server is down ✌️");
             }
-            CCU.SV_CCU.Clear();
-            SV_Message_All.Clear();
         }
 
         private async Task AcceptClients()
@@ -62,7 +58,7 @@ namespace server
                     Console.WriteLine("someoneConnected");
                     newUser = new();
                     newUser.CL_Tcp = client;
-                    newUser.CL_ID = CCU.SV_CCU.Count;
+                    newUser.CL_ID = S_analytics.Instance.GetCCU().SV_CCU.Count;
                     _ = Task.Run(() => HandleClients(newUser));
 
                     /*
@@ -139,7 +135,7 @@ namespace server
                             datapack.Sender = data.Sender;
                             if (datapack.Picture != null)
                                 datapack.Picture = data.Picture;
-                            SV_Message_All.Add(datapack);
+                            S_analytics.Instance.AddMessage_List(datapack);
 
                             DateTime now = DateTime.UtcNow;
 
@@ -198,7 +194,7 @@ namespace server
                     catch
                     {
                     }
-                    SV_Message_All.Add(data);
+                    S_analytics.Instance.AddMessage_List(data);
                 }
             }
             catch
@@ -206,11 +202,11 @@ namespace server
             }
             try { user.CL_Tcp.GetStream().Close(); } catch { };
             try { user.CL_Tcp.Close(); } catch { }
-            CCU.SV_CCU.Remove(user);
+            S_analytics.Instance.removeCCU(user);
             if (!reason.Contains("server"))
                 Broadcast_CCU();
 
-            Console.WriteLine(CCU.SV_CCU);
+            Console.WriteLine(S_analytics.Instance.GetCCU_Json());
 
         }
 
@@ -218,13 +214,13 @@ namespace server
         {
             try
             {
-                string CCU_Json = JsonSerializer.Serialize(CCU);
+                string CCU_Json = JsonSerializer.Serialize(S_analytics.Instance.GetCCU());
                 byte[] CCU_byte = new byte[1025];
                 CCU_byte = Encoding.UTF8.GetBytes(CCU_Json);
 
                 List<UserPack> Problematic = new();
                 await Task.Delay(15);
-                foreach (var item in CCU.SV_CCU.ToList())
+                foreach (var item in S_analytics.Instance.GetCCU().SV_CCU.ToList())
                 {
                     try
                     {
@@ -254,10 +250,7 @@ namespace server
         }
         private void Broadcast_AllMessages(Stream stream)
         {
-            SV_Messages sV_Messages = new();
-            sV_Messages.SV_allMessages = SV_Message_All;
-            string AllMessages_Json = JsonSerializer.Serialize(sV_Messages);
-            byte[] Allmessages_byte = Encoding.UTF8.GetBytes(AllMessages_Json);
+            byte[] Allmessages_byte = Encoding.UTF8.GetBytes(S_analytics.Instance.GetMessages_Json());
             //Console.WriteLine(AllMessages_Json);
             stream.WriteAsync(Allmessages_byte, 0, Allmessages_byte.Length);
         }
@@ -266,7 +259,7 @@ namespace server
         {
             List<UserPack> discClient = new();
 
-            foreach (var item in CCU.SV_CCU)
+            foreach (var item in S_analytics.Instance.GetCCU().SV_CCU)
             {
                 try
                 {
@@ -287,7 +280,7 @@ namespace server
 
         private void HandleClientFirstNeeding(ref string Sender, ref byte[] message_Recieved, ref int message_byteCount, UserPack user, ref int MessageCount)
         {
-            if (!CCU.SV_CCU.Contains(user))
+            if (!S_analytics.Instance.GetCCU().SV_CCU.Contains(user))
             {
                 NetworkStream Stream = user.CL_Tcp.GetStream();
                 DataPacks message = new();
@@ -300,9 +293,9 @@ namespace server
                 message.Message = $"{user.CL_Name} joined the chat";
                 message.Sender = "SERVER";
 
-                SV_Message_All.Add(message);
+                S_analytics.Instance.AddMessage_List(message);
 
-                CCU.SV_CCU.Add(user);
+                S_analytics.Instance.GetCCU().SV_CCU.Add(user);
                 Broadcast_CCU();
                 Broadcast_AllMessages(user.CL_Tcp.GetStream());
             }

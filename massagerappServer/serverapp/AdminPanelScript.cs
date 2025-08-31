@@ -17,7 +17,6 @@ namespace serverapp
     public class AdminPanelScript
     {
         serverR server = new();
-        S_analytics analytics = new();
         Task? serverTask;
         CancellationTokenSource? cs;
         private bool isRunning;
@@ -52,6 +51,33 @@ namespace serverapp
             {
                 return isRunning;
             });
+
+            app.MapGet("/api/GetCCU", async context =>
+            {
+                context.Response.Headers.Add("Content-Type", "text/event-stream");
+
+                while (true)
+                {
+                    string CCUJson = S_analytics.Instance.GetCCU_Json();
+                    await context.Response.WriteAsync($"data: {CCUJson}\n\n");
+                    await context.Response.Body.FlushAsync();
+                    await Task.Delay(5000);
+                }
+            });
+
+            app.MapGet("/api/GetMessage", async context =>
+            {
+                context.Response.Headers.Add("Content-Type", "text/event-stream");
+
+                while (true)
+                {
+                    string MessagesJson = S_analytics.Instance.GetMessages_Json();
+                    await context.Response.WriteAsync($"data: {MessagesJson}\n\n");
+                    await context.Response.Body.FlushAsync();
+                    await Task.Delay(5000);
+                }
+            });
+
 
             await Task.Run(() => app.Run("http://localhost:5001"));
 

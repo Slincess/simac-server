@@ -9,6 +9,19 @@ namespace serverapp
 {
     public class S_analytics
     {
+        private static S_analytics instance;
+        public static S_analytics Instance
+        {
+            get
+            {
+                if(instance == null)
+                {
+                    instance = new();
+                }
+                return instance;
+            }
+        }
+
         private List<DataPacks> Messages = new();
         private Users CCU = new();
         private Users UAU = new();
@@ -33,6 +46,11 @@ namespace serverapp
         public void AddCCU()
         {
 
+        }
+
+        public void removeCCU(UserPack UP)
+        {
+            CCU.SV_CCU.Remove(UP);
         }
 
         public Users GetCCU()
