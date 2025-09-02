@@ -15,6 +15,7 @@ at the end type `./serverapp` to start the server.
 
 # important!  
 server will be on port 5000 on default.
+WebUI will be on port 5001 on default.
 
 # on process WebUI 
 <img width="1897" height="955" alt="image" src="https://github.com/user-attachments/assets/63123938-eabe-4a61-a1ac-4d513550a585" />
