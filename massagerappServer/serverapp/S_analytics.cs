@@ -25,7 +25,7 @@ namespace serverapp
         private List<DataPacks> Messages = new();
         private Users CCU = new();
         private Users UAU = new();
-
+        #region Message
         public void AddMessage_List(DataPacks data)
         {
             Messages.Add(data);
@@ -42,7 +42,9 @@ namespace serverapp
             sV_Messages.SV_allMessages = Messages;
             return JsonSerializer.Serialize(sV_Messages);
         }
+        #endregion
 
+        #region CCU
         public void AddCCU()
         {
 
@@ -61,7 +63,9 @@ namespace serverapp
         {
             return JsonSerializer.Serialize(GetCCU());
         }
+        #endregion
 
+        #region UAU
         public void AddUAU()
         {
 
@@ -71,5 +75,6 @@ namespace serverapp
         {
 
         }
+        #endregion
     }
 }

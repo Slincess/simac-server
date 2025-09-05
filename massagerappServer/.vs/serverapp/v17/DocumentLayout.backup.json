@@ -50,8 +50,7 @@
               "RelativeToolTip": "serverapp\\S_analytics.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAADQAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-23T21:10:27.192Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-23T21:10:27.192Z"
             },
             {
               "$type": "Document",
@@ -85,7 +84,7 @@
               "RelativeDocumentMoniker": "serverapp\\wwwroot\\index.html",
               "ToolTip": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\wwwroot\\index.html",
               "RelativeToolTip": "serverapp\\wwwroot\\index.html",
-              "ViewState": "AgIAACwAAAAAAAAAAAAQwDcAAAAOAAAAAAAAAA==",
+              "ViewState": "AgIAACwAAAAAAAAAAAAQwDQAAABOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
               "WhenOpened": "2025-08-21T18:47:37.75Z",
               "EditorCaption": ""
@@ -100,8 +99,7 @@
               "RelativeToolTip": "serverapp\\AdminPanelScript.cs",
               "ViewState": "AgIAADUAAAAAAAAAAAAowEMAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-21T18:30:16.195Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-21T18:30:16.195Z"
             },
             {
               "$type": "Document",
@@ -125,8 +123,7 @@
               "RelativeToolTip": "serverapp\\ServerR.cs",
               "ViewState": "AgIAAHQAAAAAAAAAAAAYwIMAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-15T02:05:57.806Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-15T02:05:57.806Z"
             }
           ]
         }
