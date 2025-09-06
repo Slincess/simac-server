@@ -1,7 +1,7 @@
 # simac Server installation on ubuntu.
 
 open commendline and type this command:  
-`apt update && apt upgrade && wget https://github.com/Slincess/simac-server/releases/download/0.04/serverapp && chmod +x serverapp `
+`apt update && apt upgrade && wget https://github.com/Slincess/simac-server/releases/download/0.04/serverapp && wget https://github.com/Slincess/simac-server/releases/download/0.04/wwwroot.rar && chmod +x serverapp && unrar x serverapp.rar `
 
 after the installation type `ip a` to see your ip.
 
