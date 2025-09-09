@@ -81,7 +81,7 @@ namespace serverapp
              
 
 
-            await Task.Run(() => app.Run("http://localhost:5001"));
+            await Task.Run(() => app.Run("http://0.0.0.0:5001"));
 
         }
     }

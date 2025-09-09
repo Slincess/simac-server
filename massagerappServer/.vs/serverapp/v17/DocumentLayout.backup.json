@@ -3,10 +3,6 @@
   "WorkspaceRootPath": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|c:\\users\\kisac\\source\\repos\\massagerappserver\\massagerappserver\\serverapp\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|solutionrelative:serverapp\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|c:\\users\\kisac\\source\\repos\\massagerappserver\\massagerappserver\\serverapp\\adminpanelscript.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|solutionrelative:serverapp\\adminpanelscript.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -15,12 +11,16 @@
       "RelativeMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|solutionrelative:serverapp\\serverr.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|c:\\users\\kisac\\source\\repos\\massagerappserver\\massagerappserver\\serverapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|solutionrelative:serverapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|c:\\users\\kisac\\source\\repos\\massagerappserver\\massagerappserver\\serverapp\\s_analytics.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|solutionrelative:serverapp\\s_analytics.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|c:\\users\\kisac\\source\\repos\\massagerappserver\\massagerappserver\\serverapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|solutionrelative:serverapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|c:\\users\\kisac\\source\\repos\\massagerappserver\\massagerappserver\\serverapp\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|solutionrelative:serverapp\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6CEA3093-CD50-44CF-A1EC-0767A2BD090E}|serverapp\\serverapp.csproj|c:\\users\\kisac\\source\\repos\\massagerappserver\\massagerappserver\\serverapp\\serverapp.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
@@ -40,18 +40,6 @@
           "DockedWidth": 200,
           "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "S_analytics.cs",
-              "DocumentMoniker": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\S_analytics.cs",
-              "RelativeDocumentMoniker": "serverapp\\S_analytics.cs",
-              "ToolTip": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\S_analytics.cs",
-              "RelativeToolTip": "serverapp\\S_analytics.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAADQAAAAiAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-23T21:10:27.192Z"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 6,
@@ -78,32 +66,32 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "index.html",
               "DocumentMoniker": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\wwwroot\\index.html",
               "RelativeDocumentMoniker": "serverapp\\wwwroot\\index.html",
               "ToolTip": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\wwwroot\\index.html",
               "RelativeToolTip": "serverapp\\wwwroot\\index.html",
-              "ViewState": "AgIAACwAAAAAAAAAAAAQwDQAAABOAAAAAAAAAA==",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAQwDIAAABIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-08-21T18:47:37.75Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-21T18:47:37.75Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "AdminPanelScript.cs",
               "DocumentMoniker": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\AdminPanelScript.cs",
               "RelativeDocumentMoniker": "serverapp\\AdminPanelScript.cs",
               "ToolTip": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\AdminPanelScript.cs",
               "RelativeToolTip": "serverapp\\AdminPanelScript.cs",
-              "ViewState": "AgIAADUAAAAAAAAAAAAowEMAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAAEoAAAAAAAAAAAAAAFgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-21T18:30:16.195Z"
+              "WhenOpened": "2025-08-21T18:30:16.195Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\Program.cs",
               "RelativeDocumentMoniker": "serverapp\\Program.cs",
@@ -111,19 +99,34 @@
               "RelativeToolTip": "serverapp\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-21T18:28:45.668Z"
+              "WhenOpened": "2025-08-21T18:28:45.668Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "ServerR.cs",
               "DocumentMoniker": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\ServerR.cs",
               "RelativeDocumentMoniker": "serverapp\\ServerR.cs",
               "ToolTip": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\ServerR.cs",
               "RelativeToolTip": "serverapp\\ServerR.cs",
-              "ViewState": "AgIAAHQAAAAAAAAAAAAYwIMAAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAAF8AAAAAAAAAAAAYwIMAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-15T02:05:57.806Z"
+              "WhenOpened": "2025-08-15T02:05:57.806Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "S_analytics.cs",
+              "DocumentMoniker": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\S_analytics.cs",
+              "RelativeDocumentMoniker": "serverapp\\S_analytics.cs",
+              "ToolTip": "C:\\Users\\kisac\\source\\repos\\massagerappServer\\massagerappServer\\serverapp\\S_analytics.cs",
+              "RelativeToolTip": "serverapp\\S_analytics.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAgwFAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T21:10:27.192Z",
+              "EditorCaption": ""
             }
           ]
         }
