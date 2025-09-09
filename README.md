@@ -1,11 +1,23 @@
 # simac Server installation on ubuntu.
 
-open commendline and type this command:  
-`apt update && apt upgrade && wget https://github.com/Slincess/simac-server/releases/download/0.0.3/serverapp && chmod +x serverapp `
+install this nunrar:
+`sudo apt-get install rar unrar`
+or
+`sudo apt install rar unrar`
+
+install Server:
+  
+`apt update && apt upgrade && wget https://github.com/Slincess/simac-server/releases/download/0.04/serverapp && wget https://github.com/Slincess/simac-server/releases/download/0.04/wwwroot.rar`
+
+unpack wwwroot:
+`unrar x wwwroot`
+
+turn serverapp into executable
+`chmod +x serverapp`
 
 after the installation type `ip a` to see your ip.
 
-at the end type `./serverapp` to start the server.
+type `./serverapp` to start the server.
 
 # planned features
 -webUI  
