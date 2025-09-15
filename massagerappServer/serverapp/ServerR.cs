@@ -110,58 +110,77 @@ namespace server
                     }
                     else
                     {
-                        string message_Recieved_Json = Encoding.UTF8.GetString(message_Recieved, 0, message_byteCount);
+                        string message_Recieved_String = Encoding.UTF8.GetString(message_Recieved, 0, message_byteCount);
                         DataPacks data;
 
-                        try
+                        if (message_Recieved_String.StartsWith("GETIMAGE:"))
                         {
-                            data = JsonSerializer.Deserialize<DataPacks>(message_Recieved_Json);
-                        }
-                        catch (Exception)
-                        {
-                            Console.WriteLine(User.CL_Name + "send a invalid Json (should be normal massage) ");
-                            return;
-                        }
-
-                        if (data.Message == "__DISCONNECT__" && data.Sender == "ADMIN")
-                        {
-                            DisconnectClient(User, "left the chat");
-                            return;
+                            string key = message_Recieved_String.Substring("GETIMAGE:".Length);
+                            _ = SendImageAsync(stream, key);
                         }
                         else
                         {
-                            DataPacks datapack = new();
-                            datapack.Message = data.Message;
-                            datapack.Sender = data.Sender;
-                            if (datapack.Picture != null)
-                                datapack.Picture = data.Picture;
-                            S_analytics.Instance.AddMessage_List(datapack);
-
-                            DateTime now = DateTime.UtcNow;
-
-                            while (User.MessageTimestamps.Count > 0 && (now - User.MessageTimestamps.Peek()).TotalSeconds > 4)
+                            try
                             {
-                                User.MessageTimestamps.Dequeue();
+                                data = JsonSerializer.Deserialize<DataPacks>(message_Recieved_String);
                             }
-                            User.MessageTimestamps.Enqueue(now);
-
-                            if (User.MessageTimestamps.Count >= 7)
+                            catch (Exception)
                             {
-                                DataPacks Kickmessage = new();
-                                Kickmessage.Message = "__KICK__";
-                                Kickmessage.Sender = "__SERVER__";
-                                string KickMessage_Json = JsonSerializer.Serialize(Kickmessage);
-                                byte[] KickMessage_Byte = Encoding.UTF8.GetBytes(KickMessage_Json);
-
-                                await User.CL_Tcp.GetStream().WriteAsync(KickMessage_Byte, 0, KickMessage_Byte.Length);
-                                DisconnectClient(User, "was spamming and kicked out of the chat");
+                                Console.WriteLine(User.CL_Name + "send a invalid Json (should be normal massage) ");
                                 return;
                             }
 
+                            if (data.Message == "__DISCONNECT__" && data.Sender == "ADMIN")
+                            {
+                                DisconnectClient(User, "left the chat");
+                                return;
+                            }
+                            else
+                            {
+                                DataPacks datapack = new();
+                                datapack.Message = data.Message;
+                                datapack.Sender = data.Sender;
+                                if (data.PictureByte != null)
+                                {
+                                    datapack.PictureKey = S_analytics.Instance.AddImage(data.PictureByte);
+
+                                    string ResponseJson = JsonSerializer.Serialize(datapack);
+                                    byte[] ResponseByte = Encoding.UTF8.GetBytes(ResponseJson);
+                                    Console.WriteLine(ResponseJson);
+                                    Broadcast(ResponseByte, ResponseByte.Length);
+                                    Console.WriteLine($"{datapack.Sender}: {datapack.Message}");
+                                }
+                                else
+                                {
+                                    Console.WriteLine(message_Recieved_String);
+                                    Broadcast(message_Recieved, message_Recieved.Length);
+                                    Console.WriteLine($"{datapack.Sender}: {datapack.Message}");
+                                }
+                                    S_analytics.Instance.AddMessage_List(datapack);
+
+                                DateTime now = DateTime.UtcNow;
+
+                                while (User.MessageTimestamps.Count > 0 && (now - User.MessageTimestamps.Peek()).TotalSeconds > 4)
+                                {
+                                    User.MessageTimestamps.Dequeue();
+                                }
+                                User.MessageTimestamps.Enqueue(now);
+
+                                if (User.MessageTimestamps.Count >= 7)
+                                {
+                                    DataPacks Kickmessage = new();
+                                    Kickmessage.Message = "__KICK__";
+                                    Kickmessage.Sender = "__SERVER__";
+                                    string KickMessage_Json = JsonSerializer.Serialize(Kickmessage);
+                                    byte[] KickMessage_Byte = Encoding.UTF8.GetBytes(KickMessage_Json);
+
+                                    await User.CL_Tcp.GetStream().WriteAsync(KickMessage_Byte, 0, KickMessage_Byte.Length);
+                                    DisconnectClient(User, "was spamming and kicked out of the chat");
+                                    return;
+                                }
+
+                            }
                         }
-                        Console.WriteLine(message_Recieved_Json);
-                        Broadcast(message_Recieved, message_byteCount);
-                        Console.WriteLine($"{data.Sender}: {data.Message}");
                     }
                 }
             }
@@ -325,6 +344,26 @@ namespace server
             }
         }
 
+        public async Task SendImageAsync(NetworkStream stream, string key)
+        {
+            byte[] imageBytes = S_analytics.Instance.GetImage(key); // returns byte[] or null
+
+            if (imageBytes == null)
+            {
+                // send length = 0 to indicate missing image
+                await stream.WriteAsync(BitConverter.GetBytes(0), 0, 4);
+                return;
+            }
+
+            // send 4-byte length first
+            byte[] lenBytes = BitConverter.GetBytes(imageBytes.Length);
+            await stream.WriteAsync(lenBytes, 0, 4);
+
+            // send image data
+            await stream.WriteAsync(imageBytes, 0, imageBytes.Length);
+
+            Console.WriteLine($"{key} sended");
+        }
     }
 }
 
@@ -339,7 +378,8 @@ public class DataPacks
 {
     public string? Sender { get; set; }
     public string? Message { get; set; }
-    public string? Picture { get; set; }
+    public byte[]? PictureByte { get; set; }
+    public string? PictureKey { get; set; }
 }
 
 public class SV_Messages
