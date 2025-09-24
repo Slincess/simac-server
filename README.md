@@ -1,6 +1,6 @@
 # simac Server installation on ubuntu.
 
-install this nunrar:
+install nunrar:
 `sudo apt-get install rar unrar`
 or
 `sudo apt install rar unrar`
@@ -26,7 +26,7 @@ type `./serverapp` to start the server.
 |>server stats  
 
 # important!  
-server will be on port 5000 on default.
+TCP server will be on port 5000 on default.
 WebUI will be on port 5001 on default.
 
 # on process WebUI 
