@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -198,7 +199,7 @@ namespace serverapp
 public class analytics_var
 {
     public List<DataPacks> Messages { get; set; } = new();
-    public Users CCU { get; set; } = new();
+    [JsonIgnore]public Users CCU { get; set; } = new();
     public Users UAU { get; set; } = new();
 
     public Dictionary<string, string> imagesDictionary { get; set; } = new();

@@ -39,7 +39,7 @@
           }
 
           // CCU EventSource
-          const sourceCCU = new EventSource("/api/GetCCU");
+            const sourceCCU = new EventSource("/api/GetCCU");
           sourceCCU.onmessage = (event) => {
             const data = JSON.parse(event.data);
             const list = document.querySelector(".panel.small .scrollview ul"); // explicitly CCU ul

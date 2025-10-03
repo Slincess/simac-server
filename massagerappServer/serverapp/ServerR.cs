@@ -127,12 +127,7 @@ namespace server
                         }
                         else
                         {
-                            DataPacks datapack = new();
-                            datapack.Message = data.Message;
-                            datapack.Sender = data.Sender;
-                            if (datapack.Picture != null)
-                                datapack.Picture = data.Picture;
-                            S_analytics.Instance.AddMessage_List(datapack);
+                            S_analytics.Instance.AddMessage_List(data);
 
                             DateTime now = DateTime.UtcNow;
 
@@ -249,7 +244,7 @@ namespace server
         private void Broadcast_AllMessages(Stream stream)
         {
             byte[] Allmessages_byte = Encoding.UTF8.GetBytes(S_analytics.Instance.GetMessages_Json());
-            //Console.WriteLine(AllMessages_Json);
+            Console.WriteLine(S_analytics.Instance);
             stream.WriteAsync(Allmessages_byte, 0, Allmessages_byte.Length);
         }
 
