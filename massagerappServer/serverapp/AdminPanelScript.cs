@@ -55,7 +55,7 @@ namespace serverapp
             app.MapGet("/api/GetCCU", async context =>
             {
                 context.Response.Headers.Add("Content-Type", "text/event-stream");
-
+                
                 while (true)
                 {
                     string CCUJson = S_analytics.Instance.GetCCU_Json();
@@ -78,8 +78,41 @@ namespace serverapp
                 }
             });
 
-             
+            app.MapPost("/api/UploadImage", async (HttpRequest request) =>
+            {
+                S_analytics.Instance.SaveInfo();
+                if (!request.HasFormContentType)
+                    return Results.BadRequest("Invalid form data");
 
+                var form = await request.ReadFormAsync();
+                var file = form.Files.GetFile("png");
+
+                if (file == null || file.Length == 0)
+                    return Results.BadRequest("No file uploaded");
+
+                string key = S_analytics.Instance.AddImage(file);
+
+                return Results.Ok(key);
+            });
+
+            app.MapPost("/api/GetImage", async (HttpRequest request) =>
+            {
+                
+                if (!request.HasFormContentType)
+                    return Results.BadRequest("Invalid form data");
+
+                var form = await request.ReadFormAsync();
+                var file = form["key"];
+
+                byte[] picture_byte = S_analytics.Instance.GetImage(file);
+
+                if(picture_byte == null)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.File(picture_byte,"image/png",file + ".png");
+            });
 
             await Task.Run(() => app.Run("http://0.0.0.0:5001"));
 

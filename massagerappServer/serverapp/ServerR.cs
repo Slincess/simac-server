@@ -1,5 +1,4 @@
-﻿using serverapp;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -7,6 +6,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using serverapp;
 
 namespace server
 {
@@ -26,6 +27,7 @@ namespace server
                 Ct = ct;
                 server = new TcpListener(IPAddress.Any, 5000);
                 server.Start();
+                
                 Console.WriteLine("server started..");
                 _ = AcceptClients();
             }
@@ -34,6 +36,7 @@ namespace server
         public async Task StopServer()
         {
             if (!Isrunning) return;
+            S_analytics.Instance.SaveInfo();
             Isrunning = false;
             server?.Stop();
             server = null;
@@ -60,12 +63,6 @@ namespace server
                     newUser.CL_Tcp = client;
                     newUser.CL_ID = S_analytics.Instance.GetCCU().SV_CCU.Count;
                     _ = Task.Run(() => HandleClients(newUser));
-
-                    /*
-                    datapack Joinmessage = new();
-                    Joinmessage.datapack = $"{newUser} joined the chat";
-                    SV_Message_All.Add(Joinmessage);
-                    */
                 }
             }
             catch (Exception e)
