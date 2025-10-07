@@ -18,7 +18,7 @@ namespace serverapp
     {
         serverR server = new();
         Task? serverTask;
-        CancellationTokenSource? cs;
+        CancellationTokenSource? serverCts;
         private bool isRunning;
         public async Task Run()
         {
@@ -27,25 +27,11 @@ namespace serverapp
 
             app.UseStaticFiles();
 
+
             app.MapGet("/", context =>
             {
                 context.Response.Redirect("/index.html");
                 return Task.CompletedTask;
-            });
-            app.MapGet("api/StartServer", () =>
-            {
-                //server.analytics = analytics;
-                cs = new();
-                serverTask = Task.Run(() => server.Run(cs.Token), cs.Token);
-                isRunning = true;
-                //return Results.Ok(true);
-            });
-            app.MapGet("api/CloseServer", async () =>
-            {
-                await server.StopServer();
-                cs?.Cancel();
-                isRunning = false;
-                //return Results.Ok(true);
             });
             app.MapGet("api/running", () =>
             {
@@ -55,12 +41,42 @@ namespace serverapp
             app.MapGet("/api/GetCCU", async context =>
             {
                 context.Response.Headers.Add("Content-Type", "text/event-stream");
-                while (true)
+                try
                 {
-                    string CCUJson = S_analytics.Instance.GetCCU_Json(); 
-                    await context.Response.WriteAsync($"data: {CCUJson}\n\n");
-                    await context.Response.Body.FlushAsync(); 
-                    
+                    while (!context.RequestAborted.IsCancellationRequested)
+                    {
+                        string CCUJson = S_analytics.Instance.GetCCU_Json();
+                        await context.Response.WriteAsync($"data: {CCUJson}\n\n");
+                        await context.Response.Body.FlushAsync();
+
+
+                        try
+                        {
+                            await Task.Delay(5000, context.RequestAborted);
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            break;
+                        }
+                    }
+                }
+                catch
+                {
+
+                    throw;
+                }
+            });
+
+            app.MapGet("/api/GetMessage", async context =>
+            {
+                context.Response.Headers.Add("Content-Type", "text/event-stream");
+
+
+                while (!context.RequestAborted.IsCancellationRequested)
+                {
+                    string MessagesJson = S_analytics.Instance.GetMessages_Json();
+                    await context.Response.WriteAsync($"data: {MessagesJson}\n\n");
+                    await context.Response.Body.FlushAsync();
 
                     try
                     {
@@ -71,28 +87,6 @@ namespace serverapp
                         break;
                     }
                 }
-            });
-
-            app.MapGet("/api/GetMessage", async context =>
-            {
-                context.Response.Headers.Add("Content-Type", "text/event-stream");
-
-
-    while (!context.RequestAborted.IsCancellationRequested)
-    {
-        string MessagesJson = S_analytics.Instance.GetMessages_Json();
-        await context.Response.WriteAsync($"data: {MessagesJson}\n\n");
-        await context.Response.Body.FlushAsync();
-
-        try
-        {
-            await Task.Delay(5000, context.RequestAborted);
-        }
-        catch (TaskCanceledException)
-        {
-            break;
-        }
-    }
             });
 
             app.MapPost("/api/UploadImage", async (HttpRequest request) =>
@@ -114,7 +108,7 @@ namespace serverapp
 
             app.MapPost("/api/GetImage", async (HttpRequest request) =>
             {
-                
+
                 if (!request.HasFormContentType)
                     return Results.BadRequest("Invalid form data");
 
@@ -123,12 +117,48 @@ namespace serverapp
 
                 byte[] picture_byte = S_analytics.Instance.GetImage(file);
 
-                if(picture_byte == null)
+                if (picture_byte == null)
                 {
                     return Results.NotFound();
                 }
 
-                return Results.File(picture_byte,"image/png",file + ".png");
+                return Results.File(picture_byte, "image/png", file + ".png");
+            });
+            app.MapGet("/api/StartServer", () =>
+            {
+                if (isRunning)
+                    return Results.Conflict("Server already running");
+
+                serverCts = new CancellationTokenSource();
+                serverTask = Task.Run(() => server.Run(serverCts.Token), serverCts.Token);
+                isRunning = true;
+                return Results.Ok(true);
+            });
+
+            app.MapGet("/api/CloseServer", async () =>
+            {
+                if (!isRunning)
+                    return Results.BadRequest("Server not running");
+                await server.StopServer();
+                serverCts?.Cancel();
+                try
+                {
+                    serverTask.Dispose();
+                    if (serverTask != null)
+                        await serverTask;
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("server stop exception: " + ex);
+                }
+
+                serverTask = null;
+                serverCts?.Dispose();
+                serverCts = null;
+                isRunning = false;
+
+                return Results.Ok(true);
             });
 
             await Task.Run(() => app.Run("http://0.0.0.0:5001"));

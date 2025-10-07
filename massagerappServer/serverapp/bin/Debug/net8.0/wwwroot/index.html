@@ -25,21 +25,32 @@
       </div>
 
       <script>
-        async function OpenOrCloseServer() {
-          const button = document.getElementById("ServerStatButton");
 
-          let isRunning = await (await fetch("/api/running")).json();
+          let sourceCCU = null;
+          let sourceMessage = null;
 
-          if (isRunning) {
-            await fetch("/api/CloseServer");
-            button.textContent = "Run";
-          } else {
-            await fetch("/api/StartServer");
-            button.textContent = "Close";
+          async function OpenOrCloseServer() {
+            const button = document.getElementById("ServerStatButton");
+
+            let isRunning = await (await fetch("/api/running")).json();
+
+            if (isRunning) {
+              await fetch("/api/CloseServer");
+              button.textContent = "Run";
+              closeSources();
+              sourceMessage = null;
+              sourceCCU = null;
+            } else {
+              await fetch("/api/StartServer");
+              button.textContent = "Close";
+              StartSource();
+            }
+
           }
 
+        function StartSource(){
           // CCU EventSource
-            const sourceCCU = new EventSource("/api/GetCCU");
+          sourceCCU = new EventSource("/api/GetCCU");
           sourceCCU.onmessage = (event) => {
             const data = JSON.parse(event.data);
             const list = document.querySelector(".panel.small .scrollview ul"); // explicitly CCU ul
@@ -54,7 +65,7 @@
           };
 
           // Messages EventSource
-          const sourceMessage = new EventSource("/api/GetMessage");
+          sourceMessage = new EventSource("/api/GetMessage");
           sourceMessage.onmessage = (event) => {
             const data = JSON.parse(event.data); // object with SV_allMessages
             const messages = data.SV_allMessages;
@@ -69,6 +80,11 @@
 
             chatBox.scrollTop = chatBox.scrollHeight;
           };
+        }
+
+        function closeSources() {
+          if (sourceCCU) sourceCCU.close(); sourceCCU = null;
+          if (sourceMessage) sourceMessage.close(); sourceMessage = null;
         }
       </script>
 

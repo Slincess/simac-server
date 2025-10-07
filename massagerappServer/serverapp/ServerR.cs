@@ -50,19 +50,25 @@ namespace server
         {
             try
             {
-                while (Isrunning)
+                while (!Ct.IsCancellationRequested)
                 {
-                    if (Ct.IsCancellationRequested)
+                    try
+                    {
+                        TcpClient client = await server.AcceptTcpClientAsync();
+                        Console.WriteLine("someoneConnected");
+                        newUser = new();
+                        newUser.CL_Tcp = client;
+                        newUser.CL_ID = S_analytics.Instance.GetCCU().SV_CCU.Count;
+                        _ = Task.Run(() => HandleClients(newUser));
+                    }
+                    catch (OperationCanceledException)
                     {
                         break;
                     }
-
-                    TcpClient client = await server.AcceptTcpClientAsync();
-                    Console.WriteLine("someoneConnected");
-                    newUser = new();
-                    newUser.CL_Tcp = client;
-                    newUser.CL_ID = S_analytics.Instance.GetCCU().SV_CCU.Count;
-                    _ = Task.Run(() => HandleClients(newUser));
+                    catch (SocketException ex) when (ex.ErrorCode == 995)
+                    {
+                        break;
+                    }
                 }
             }
             catch (Exception e)
