@@ -29,6 +29,12 @@
           let sourceCCU = null;
           let sourceMessage = null;
 
+          function CleanChat() {
+            fetch("/api/clearChat");
+            const chatBox = document.getElementById("chatMessages");
+            chatBox.innerHTML = "";
+          }
+
           async function OpenOrCloseServer() {
             const button = document.getElementById("ServerStatButton");
 

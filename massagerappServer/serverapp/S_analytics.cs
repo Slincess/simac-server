@@ -159,6 +159,12 @@ namespace serverapp
             sV_Messages.SV_allMessages = variable.Messages;
             return JsonSerializer.Serialize(sV_Messages);
         }
+
+        public void ClearChat()
+        {
+            variable.Messages.Clear();
+            SaveInfo();
+        }
         #endregion
 
         #region CCU

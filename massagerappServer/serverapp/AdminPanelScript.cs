@@ -161,6 +161,11 @@ namespace serverapp
                 return Results.Ok(true);
             });
 
+            app.MapGet("api/clearChat", async () =>
+            {
+                S_analytics.Instance.ClearChat();
+            });
+
             await Task.Run(() => app.Run("http://0.0.0.0:5001"));
 
         }
