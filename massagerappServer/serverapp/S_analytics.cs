@@ -148,11 +148,6 @@ namespace serverapp
             variable.Messages.Add(data);
         }
 
-        public void SaveMessages()
-        {
-
-        }
-
         public string GetMessages_Json()
         {
             SV_Messages sV_Messages = new();
@@ -163,6 +158,11 @@ namespace serverapp
         public void ClearChat()
         {
             variable.Messages.Clear();
+            foreach (var i in variable.imagesDictionary) 
+            {
+                File.Delete(i.Value);
+                variable.imagesDictionary.Remove(i.Key);
+            }
             SaveInfo();
         }
         #endregion
@@ -208,6 +208,10 @@ public class analytics_var
     [JsonIgnore]public Users CCU { get; set; } = new();
     public Users UAU { get; set; } = new();
 
+
+    /// <summary>
+    /// value is path to the picture.
+    /// </summary>
     public Dictionary<string, string> imagesDictionary { get; set; } = new();
     public string ImagesPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "images");
 }
