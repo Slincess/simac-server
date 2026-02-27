@@ -1,16 +1,19 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.FileProviders;
-using server;
+﻿using System;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using server;
 
 namespace serverapp
 {
@@ -24,6 +27,7 @@ namespace serverapp
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder();
             WebApplication app = builder.Build();
+            var awaort = app.Services.GetService<IServerAddressesFeature>();
 
             app.UseStaticFiles();
 
@@ -167,6 +171,7 @@ namespace serverapp
             });
 
             await Task.Run(() => app.Run("http://0.0.0.0:5001"));
+            Debug.WriteLine(awaort);
 
         }
     }

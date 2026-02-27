@@ -27,7 +27,7 @@ namespace server
                 Ct = ct;
                 server = new TcpListener(IPAddress.Any, 5000);
                 server.Start();
-                
+
                 Console.WriteLine("server started..");
                 _ = AcceptClients();
             }
@@ -189,18 +189,20 @@ namespace server
                     {
                         user.CL_Tcp.GetStream().Write(leaveByte, 0, leaveJson.Length);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        Console.WriteLine($"{user.CL_Name} + {e} ");
                     }
                     S_analytics.Instance.AddMessage_List(data);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
             }
-            try { user.CL_Tcp.GetStream().Close(); } catch { }
+            try { user.CL_Tcp.GetStream().Close(); } catch (Exception e) { Console.WriteLine(e); }
             ;
-            try { user.CL_Tcp.Close(); } catch { }
+            try { user.CL_Tcp.Close(); } catch (Exception e) { Console.WriteLine(e); }
             S_analytics.Instance.removeCCU(user);
             if (!reason.Contains("server"))
                 Broadcast_CCU();
@@ -299,31 +301,6 @@ namespace server
                 Broadcast_AllMessages(user.CL_Tcp.GetStream());
             }
         }
-
-        private async Task HandleSpams(UserPack User)
-        {
-            DateTime now = DateTime.UtcNow;
-
-            while (User.MessageTimestamps.Count > 0 && (now - User.MessageTimestamps.Peek()).TotalSeconds > 4)
-            {
-                User.MessageTimestamps.Dequeue();
-            }
-            User.MessageTimestamps.Enqueue(now);
-
-            if (User.MessageTimestamps.Count >= 7)
-            {
-                DataPacks Kickmessage = new();
-                Kickmessage.Message = "__KICK__";
-                Kickmessage.Sender = "__SERVER__";
-                string KickMessage_Json = JsonSerializer.Serialize(Kickmessage);
-                byte[] KickMessage_Byte = Encoding.UTF8.GetBytes(KickMessage_Json);
-
-                await User.CL_Tcp.GetStream().WriteAsync(KickMessage_Byte, 0, KickMessage_Byte.Length);
-                DisconnectClient(User, "was spamming and kicked out of the chat");
-                return;
-            }
-        }
-
     }
 }
 
@@ -344,8 +321,8 @@ public class DataPacks
 public class SV_Messages
 {
     public List<DataPacks> SV_allMessages { get; set; } = new();
+    public string filesendingIP { get; set; }
 }
-
 
 public class Users
 {
